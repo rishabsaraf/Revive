@@ -3,6 +3,8 @@ import sys
 import re
 from os.path import isfile, join
 
+FILE_NAME_PATTERN = "S%SE%E"
+
 def get_filenames(directory=None):
 	"""
 	Gets the list of filenames present in the directory.
@@ -59,8 +61,44 @@ def get_season_and_episode_number(filename):
 
 	return (season,episode)
 
+def update_name_pattern(namePattern):
+	"""
+	Sets the name pattern to the default pattern if it is empty.
+	@param namePattern: the file name pattern
+	@return namePattern: the updated file name pattern
+	"""
+	if not namePattern:
+		namePattern = FILE_NAME_PATTERN
+	return namePattern
+
+def get_new_name(filename, namePattern):
+	"""
+	Gets the new name for a filename based on a pattern.
+	@param filename: the current file name.
+	@param namePattern: the name pattern according to which the new file name is to be returned.
+	@return newFilename: new name for the file.
+	"""
+	(baseName, extension) = os.path.splitext(filename)
+	(season, episode) = get_season_and_episode_number(filename)
+	newFilename = get_filename_from_pattern(namePattern, season, episode)
+	newFilename = newFilename + extension
+
+def get_filename_from_pattern(namePattern, season, episode):
+	"""
+	Gets the filename from the name pattern by replacing the pattern with season and episode at relevant places.
+	@param season: the season number as string
+	@param episode: the episode number as string
+	@return filename: the name generated from the pattern, season and episode
+	"""
+	name = namePattern.replace("%s", season)
+	name = name.replace("%S", season)
+	name = name.replace("%e", episode)
+	name = name.replace("%E", episode)
+	return name
+
 if __name__ == '__main__':
 	directory = raw_input("Enter the directory: ")
-	a = get_filenames(directory)
-	a = remove_sysfiles(a)
+	filesList = get_filenames(directory)
+	filesList = remove_sysfiles(filesList)
+	namePattern = raw_input("Enter the file name pattern: ")
 	print(a)
