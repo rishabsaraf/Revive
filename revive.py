@@ -25,6 +25,7 @@ def get_filenames(directory=None):
 
 	return filenames
 
+
 def remove_sysfiles(filesList):
 	"""
 	Removes the system files from a lists for files.
@@ -37,6 +38,7 @@ def remove_sysfiles(filesList):
 			newFilesList.append(filename)
 	return newFilesList
 
+
 def clean_string(string):
 	"""
 	Removes all the non alphanumeric characters from the file name.
@@ -44,6 +46,7 @@ def clean_string(string):
 	@return cleanedString: string containing only alphanumeric characters.
 	"""
 	return re.sub('[^0-9a-zA-z]+','',string)
+
 
 def get_season_and_episode_number(filename):
 	"""
@@ -61,6 +64,7 @@ def get_season_and_episode_number(filename):
 
 	return (season,episode)
 
+
 def update_name_pattern(namePattern):
 	"""
 	Sets the name pattern to the default pattern if it is empty.
@@ -71,6 +75,7 @@ def update_name_pattern(namePattern):
 		namePattern = FILE_NAME_PATTERN
 	return namePattern
 
+
 def get_new_name(filename, namePattern):
 	"""
 	Gets the new name for a filename based on a pattern.
@@ -80,8 +85,13 @@ def get_new_name(filename, namePattern):
 	"""
 	(baseName, extension) = os.path.splitext(filename)
 	(season, episode) = get_season_and_episode_number(filename)
-	newFilename = get_filename_from_pattern(namePattern, season, episode)
+	if not season or not episode:
+		newFilename = baseName
+	else:
+		newFilename = get_filename_from_pattern(namePattern, season, episode)
 	newFilename = newFilename + extension
+	return newFilename
+
 
 def get_filename_from_pattern(namePattern, season, episode):
 	"""
@@ -96,9 +106,22 @@ def get_filename_from_pattern(namePattern, season, episode):
 	name = name.replace("%E", episode)
 	return name
 
+
+def update_filenames(directory, filesList, namePattern):
+	"""
+	Updates all the file names present in the filesList according to the namePattern.
+	@param directory: the directory path of all the files present in the filesList
+	@param filesList: the list of files whose names are to be updated.
+	@param namePattern: the namePattern according to which the new filenames are to be generated.
+	"""
+	for filename in filesList:
+		newFilename = get_new_name(filename, namePattern)
+		os.rename(os.path.join(directory,filename),os.path.join(directory,newFilename))
+
+
 if __name__ == '__main__':
 	directory = raw_input("Enter the directory: ")
 	filesList = get_filenames(directory)
 	filesList = remove_sysfiles(filesList)
 	namePattern = raw_input("Enter the file name pattern: ")
-	print(a)
+	update_filenames(directory, filesList, namePattern)
